@@ -1,0 +1,217 @@
+﻿
+/*#region font size */
+.H1 {
+    font-size: 2rem !important;
+    display: inline;
+}
+
+
+.H2 {
+    font-size: 1.8rem !important;
+    display: inline;
+}
+
+.H3 {
+    font-size: 1.6rem !important;
+    display: inline;
+}
+
+.H4 {
+    font-size: 1.4rem;
+    display:inline;
+}
+.H5 {
+    font-size: 1.2rem;
+    display: inline;
+}
+.H6 {
+    font-size: 1rem;
+    display: inline-block;
+}
+
+.H7 {
+    font-size: 0.8rem;
+    display: inline-block;
+}
+
+.H7 {
+    font-size: 0.6rem;
+    display: inline-block;
+}
+
+/*#endregion font size */
+
+.b{
+    font-weight:bold;
+}
+
+
+.block{
+    display:block !important;
+}
+
+
+
+.heightReset{
+    height:auto !important;
+    line-height:1 !important;
+}
+.bottomLine{
+
+    border-bottom:solid black 1px;
+}
+
+.clearHover:hover {
+    background-color: initial !important;
+    color: initial;
+}
+
+.center-align {
+    text-align: center !important;
+}
+.left-align {
+    text-align: left !important;
+}
+
+.right-align {
+    text-align: right !important;
+}
+
+.middle-align {
+    vertical-align: middle !important;
+}
+.top-align {
+    vertical-align:top !important;
+}
+
+.bottom-align {
+    vertical-align: bottom !important;
+}
+
+
+
+.center{
+    float: none !important;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.left {
+    float: left !important;
+}
+
+.right {
+    float: right !important;
+}
+
+
+.inline {
+    display: inline !important;
+}
+
+
+
+/*#region basic */
+
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Ubuntu',sans-serif;
+}
+
+
+body {
+    height: 100vh;
+    overflow-x: hidden;
+}
+
+/*#endregion basic */
+
+
+.input{
+    width:100%;
+    max-width:90vw;
+}
+
+.input label {
+    position: relative;
+    width: auto !important;
+}
+
+.input label input {
+     width: 100%;
+    height: 40px;
+    border-radius: 40px;
+    padding: 5px 20px;
+    padding-left: 55px;
+    padding-right: 55px;
+    outline: none;
+    border: 1px solid var(--black2);
+}
+
+.inputTop label input {
+    border-radius: 0;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom: 0;
+}
+
+
+.inputBottom label input {
+    border-radius: 0;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+.noBorder label input {
+    border-radius: 0;
+    border-bottom: 0;
+}
+
+
+.inputBottom label input {
+    border-radius: 0;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+
+
+.iconLeft {
+    /* position: absolute;*/
+    top: 0;
+    left: 10px;
+    font-size: 1.5em;
+}
+
+.iconRight {
+    /* position: absolute;*/
+    top: 0;
+    right: 10px;
+    font-size: 1.5em;
+}
+
+ /*#region btn */
+
+
+
+.btn {
+    cursor: pointer;
+    transition: all 0.2s ease-in-out !important;
+    opacity:0.8;
+    overflow:hidden;
+}
+
+    .btn:hover {
+        opacity: 1;
+        transform: scale(0.9);
+    }
+
+.disabled {
+    color: gray;
+}
+
+/*#endregion btn */
+

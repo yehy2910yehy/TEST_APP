@@ -1,0 +1,723 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>3D DEMO</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="css/grid.css" rel="stylesheet" />
+    <link href="css/color.css" rel="stylesheet" />
+    <link href="css/basic.css" rel="stylesheet" />
+    <link href="css/marges.css" rel="stylesheet" />
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body>
+    <style>
+        :root {
+            --colWidth: 250px;
+            --margin: 10px;
+            --tilteBarHeight: 50px;
+            --menuBarHeight: 50px;
+        }
+
+        [v-cloak] {
+            display: none;
+        }
+
+        .vl {
+            border-left: 1px solid gray;
+        }
+
+        .hl {
+            display: block;
+            border-bottom: 1px solid lightslategray;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0px;
+            padding: 0px;
+            position: relative;
+        }
+
+        .mainContainer1 {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - var(--menuBarHeight) - var(--tilteBarHeight) - var(--margin) );
+            padding: 0px;
+            display: grid;
+            grid-template-columns: var(--colWidth) 1fr var(--colWidth);
+            grid-gap: var(--margin);
+        }
+
+        .titreContainer {
+            position: relative;
+            width: 100%;
+            padding: 0px;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+            .titreContainer .col {
+                margin: 0;
+                padding: 0;
+                position: relative;
+                justify-content: space-between;
+                overflow: hidden;
+            }
+
+        .col {
+            position: relative;
+            padding: 10px;
+            justify-content: space-between;
+            /* border:1px solid red;*/
+            /* box-shadow: 0px 0px 5px 2px rgba(0, 0, 0, .2);*/
+        }
+
+        .btn {
+            cursor: pointer;
+            opacity: 0.8;
+            overflow: hidden;
+        }
+
+            .btn:hover {
+                opacity: 1;
+                background-color: lightblue;
+            }
+
+        .selected {
+            opacity: 1;
+            background-color: lightblue;
+        }
+
+        .bg-gris {
+            background-color: dimgray;
+        }
+
+        .bg-blanc {
+            background-color: whitesmoke;
+        }
+    </style>
+    <!--loader -->
+    <section id="loader" v-cloak v-if="loaderOn === true" class="loaderContainer">
+        <div class="loader">
+            <div class="m-lr-3 m-tb-05">
+                <img src="assets/gif/2.gif" width="50" height="50" class="p-0 m-0" />
+            </div>
+            <h5 v-if="message?.length > 0 " class="center-align">{{message}}</h5>
+        </div>
+    </section>
+    <div id="demo" v-cloak>
+        <div style="height:50px;" class="p-1 gris2">
+            <div class="titreContainer">
+                <div class="col">
+                    <span class=" h6 b p-05 m-0">3D DEMO</span>
+                </div>
+                <div class="col">
+                    <span class="center-align">{{fileName}}</span>
+                </div>
+                <div class="col">
+                </div>
+            </div>
+        </div>
+        <input id="fileInput" type="file" multiple @change="fileChange" style="visibility:hidden; height:0; width:0; display:contents;" />
+        <!-- menu bar -->
+        <div style="height:50px;" class="p-05 gris2 bg-blanc-2 ">
+            <span @click="browseClick" class="gris2 H3 m-l-05 btn"><i class="fa fa-folder-open-o"></i></span>
+            <span class="vl m-lr-1 H3"></span>
+            <span @click="truckExample" class="gris2 H3 m-lr-05 btn"><i class="fa fa-truck"></i></span>
+            <span @click="helmetExample" class="gris2 H3 m-lr-05 btn"><i class="fa fa-thumb-tack"></i></span>
+            <span @click="toggleDarkMode" class="gris2 H3 m-lr-2 btn right">
+                <i v-if="dark===true" class="fa fa-toggle-on"></i>
+                <i v-else class="fa fa-toggle-off"></i>
+            </span>
+        </div>
+        <div class="mainContainer1">
+            <!--  LEFT MESHES -->
+            <div class="col">
+                <span class="H4 gris3">Meshes</span>
+                <span class="hl m-t-025 H3"></span>
+                <ul class="m-t-1">
+                    <li v-for="m in meshList" class="m-t-025">
+                        <div @click="meshSelect(m)" class="btn" :class=" isMeshSelected(m) == true? 'selected':'' ">
+                            <span class="H5 gris3">{{m.name | formatLong}}</span>
+                            <span @click="toggleViewMesh(m)" class="H4 gris1 right m-lr-1 btn b">
+                                <i v-if="m.visible===true" class="fa fa-eye"> </i>
+                                <i v-else class="fa fa-eye-slash"> </i>
+                            </span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!--  CENTER CANVAS -->
+            <div id="canvasContainer" class="m-05">
+                <canvas id="myCanvas" style="width:100%; height:100%;" :class="dark === true? 'bg-gris':'bg-blanc'"></canvas>
+            </div>
+            <!--  RIGHT DETAILS -->
+            <div class="col">
+                <span class="H4 gris3">Details</span>
+                <span class="hl m-t-025 H3"></span>
+                <table class="gris2" cellpadding="10" cellspacing="15" width="100%">
+                    <tbody>
+                        <tr>
+                            <td>Vertices:</td>
+                            <td>{{verticesCount}}</td>
+                        </tr>
+                        <tr>
+                            <td>Triangles:</td>
+                            <td>{{trianglesCount}}</td>
+                        </tr>
+                        <tr>
+                            <td>Size X:</td>
+                            <td>{{sizeX}}</td>
+                        </tr>
+                        <tr>
+                            <td>Size Y:</td>
+                            <td>{{sizeY}}</td>
+                        </tr>
+                        <tr>
+                            <td>Size Z:</td>
+                            <td>{{sizeZ}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <span class="H4 gris3">Extra Information</span>
+                <span class="hl m-t-025 H3"></span>
+                <table class="gris2" cellpadding="10" cellspacing="15" width="100%">
+                    <tbody>
+                        <tr v-if="author != '' ">
+                            <td>Author:</td>
+                            <td :title="author">{{author | formatLong(15)}}</td>
+                        </tr>
+                        <tr v-if="license != '' ">
+                            <td>License:</td>
+                            <td :title="license">{{license  | formatLong}}</td>
+                        </tr>
+                        <tr v-if="title != '' ">
+                            <td>Title:</td>
+                            <td :title="title">{{title  | formatLong}}</td>
+                        </tr>
+                        <tr v-if="generator != '' ">
+                            <td>Generator:</td>
+                            <td :title="generator">{{generator}}</td>
+                        </tr>
+                        <tr v-if="version != '' ">
+                            <td>Version:</td>
+                            <td :title="version">{{version}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="lib/jquery.min.js"></script>
+    <script src="/lib/Vue.2.6.14.min.js"></script>
+    <script>
+        var Loader = new Vue({
+            el: '#loader',
+            data: {
+                loaderOn: false,
+                message: '',
+            },
+            mounted: function () {
+            },
+            methods: {
+                on: function (msg) {
+                    this.message = msg;
+                    this.loaderOn = true;
+                },
+                off: function () {
+                    this.loaderOn = false;
+                },
+                updateMessage: function (msg) {
+                    this.message = msg;
+                }
+            }
+        });
+    </script>
+    <script type="module">
+        import { OrbitControls } from 'https://unpkg.com/three@0.119.1/examples/jsm/controls/OrbitControls.js';
+    /*    import { DragControls } from 'https://unpkg.com/three@0.119.1/examples/jsm/controls/DragControls.js';*/
+        import * as THREE from 'https://unpkg.com/three@0.119.1/build/three.module.js';
+      /*  import { BufferGeometryUtils } from 'https://unpkg.com/three@0.119.1/examples/jsm/utils/BufferGeometryUtils.js';*/
+        import { GLTFLoader } from 'https://unpkg.com/three@0.119.1/examples/jsm/loaders/GLTFLoader.js';
+        import { OBJLoader } from 'https://unpkg.com/three@0.119.1/examples/jsm/loaders/OBJLoader.js';
+        // import { PLYLoader } from 'https://unpkg.com/three@0.119.1/examples/jsm/loaders/PLYLoader.js';
+        // import { MTLLoader } from 'https://unpkg.com/three@0.119.1/examples/jsm/loaders/MTLLoader.js';
+        new Vue({
+            el: '#demo',
+            created: function () { },
+            mounted: function () {
+                var self = this;
+                var cc = document.querySelector('#canvasContainer');
+                self.c_width = cc.clientWidth - 10;
+                self.c_height = cc.clientHeight - 10;
+                this.fileName = this.nameDef;
+                //  this.fileName = 'scene.gltf';
+                this.rayINI();
+                window.addEventListener('resize', function () { self.updateSize(); });
+            },
+            watch: {
+                'fileName': function (newVal, oldVal) {
+                    if (!newVal)
+                        this.fileName = this.noFileMsg;
+                    else
+                        this.LOAD(this.fileName);
+                },
+                'model': function (newVal, oldVal) {
+                    var self = this;
+                    if (newVal) {
+                        self.meshList = new Array();
+                        // glb + gltf info are in scene
+                        if (newVal.scene)
+                            newVal.scene.traverse(function (child) {
+                                if (child.isMesh)
+                                    self.meshList.push(child);
+                            });
+                        // obj
+                        else
+                            newVal.traverse(function (child) {
+                                if (child.isMesh)
+                                    self.meshList.push(child);
+                            });
+                        self.globalInfo();
+                    }
+                },
+                'meshSelected': function (newVal, oldVal) {
+                    var self = this;
+                    if (newVal) {
+                        var vertices = newVal.geometry?.attributes?.position?.array;
+                        self.verticesCount = vertices.length / 3;
+                        if (newVal.geometry.index !== null)
+                            self.trianglesCount = newVal.geometry?.index?.count / 3;
+                        else
+                            self.trianglesCount = newVal.geometry?.attributes?.position?.count / 3;
+                        var box = new THREE.Box3().setFromObject(newVal);
+                        const center = new THREE.Vector3();
+                        var size = box.getSize(center);
+                        self.sizeX = size.x.toFixed(2);
+                        self.sizeY = size.y.toFixed(2);
+                        self.sizeZ = size.z.toFixed(2);
+                    }
+                    else
+                        self.globalInfo();
+                },
+            },
+            computed: {
+                clientAddEnabled: function () {
+                    return this.clientLastNameNew?.length > 2 && func.isMailValid(this.clientMailNew);
+                },
+            },
+            filters: {
+                formatLong: function (txt, max) {
+                    max = max || 12;
+                    if (!txt)
+                        return txt;
+                    if (txt.length > max) {
+                        let txt2 = txt.slice(0, max) + '..';
+                        return txt2;
+                    }
+                    else
+                        return txt;
+                },
+            },
+            data: {
+                //#region canvas
+                dark: true,
+                c_width: 0,
+                c_height: 0,
+                //#endregion canvas
+                //#region info
+                fileName: 'no file selected',
+                model: '',
+                meshList: new Array(),
+                meshSelected: '',
+
+                //#endregion info
+                verticesCount: 0,
+                trianglesCount: 0,
+                sizeX: 0,
+                sizeY: 0,
+                sizeZ: 0,
+                //#endregion info
+
+                //#region extra info
+                author: '',
+                license: '',
+                title: '',
+                generator: '',
+                version: '',
+                //#endregion  extra info
+
+                //#region scene composition
+                scene: new THREE.Scene(),
+                camera: '',
+                cameraTarget: '',
+                light1: '',
+                light2: '',
+                renderer: '',
+                controls: '',
+                //#endregion scene composition
+
+                //#region default
+                nameDef: 'model.glb',
+                noFileMsg: 'no file selected',
+                //#endregion default
+            },
+            methods: {
+                //#region Connections
+                UPLOAD_FILES: function (formData) {
+                    return $.ajax({
+                        url: `${window.location}files/upload`,
+                        type: 'POST',
+                        contentType: false,
+                        processData: false,
+                        data: formData,
+                    });
+                },
+                //#endregion Connections
+                //#region try
+                pos: function (mesh) {
+                    var position = mesh.geometry.attributes.position;
+                    var vector = new THREE.Vector3();
+                    for (let i = 0, l = position.count; i < l; i++)
+                        vector.fromBufferAttribute(position, i);
+                    vector.applyMatrix4(mesh.matrixWorld);
+                    console.log(vector);
+                },
+                //#endregion try
+                //#region helpers
+                browseClick: function () { $('#fileInput').click(); },
+                fileChange: function (ev) {
+                    var self = this;
+                    var files = ev.target.files
+                    var formData = new FormData();
+                    for (var i = 0; i !== files.length; i++) {
+                        formData.append("files", files[i]);
+                    }
+                    self.UPLOAD_FILES(formData)
+                        .done(function (name) { self.fileName = name; })
+                        .fail(function (err) {
+                            self.fileName = '';
+                            alert(err.responseText);
+                        });
+                },
+                toggleDarkMode: function () { this.dark = !this.dark; },
+                truckExample: function () { this.fileName = 'scene.gltf'; },
+                helmetExample: function () { this.fileName = 'model.glb'; },
+                globalInfo: function () {
+                    var self = this;
+                    var verticesCount = 0;
+                    var triangleCount = 0;
+                    for (var i = 0; i < self.meshList.length; i++) {
+                        var actual = self.meshList[i];
+                        var vertices = actual.geometry?.attributes?.position?.array;
+                        verticesCount += vertices.length / 3;
+                        if (actual.geometry.index !== null)
+                            triangleCount += actual.geometry?.index?.count / 3;
+                        else
+                            triangleCount += actual.geometry?.attributes?.position?.count / 3;
+                    }
+                    self.verticesCount = verticesCount;
+                    self.trianglesCount = triangleCount;
+                    const center = new THREE.Vector3();
+                    var root = self.meshList[0].parent;
+                    if (root != null) {
+                        var box = new THREE.Box3().setFromObject(root);
+                        var size = box.getSize(center);
+                        self.sizeX = size.x.toFixed(2);
+                        self.sizeY = size.y.toFixed(2);
+                        self.sizeZ = size.z.toFixed(2);
+                    }
+                    self.author = self.model?.asset?.extras?.author || '';
+                    self.license = self.model?.asset?.extras?.license || '';
+                    self.title = self.model?.asset?.extras?.title || '';
+                    self.generator = self.model?.asset?.generator || '';
+                    self.version = self.model?.asset?.version || '';
+                },
+                //#endregion helpers
+                updateSize: function () {
+                    var cc = document.querySelector('#canvasContainer');
+                    this.c_width = cc.clientWidth - 10;
+                    this.c_height = cc.clientHeight - 10;
+                    this.camera.aspect = this.c_width / this.c_height;
+                    this.camera.updateProjectionMatrix();
+                    // update renderer
+                    this.renderer.setSize(this.c_width, this.c_height);
+                    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                },
+                INI: function () {
+                    var self = this;
+                    var myCanvas = document.querySelector('#myCanvas');
+                    self.scene = new THREE.Scene();
+                    self.light1 = new THREE.DirectionalLight(0xffffff, 1);
+                    self.light1.position.set(2, 2, 5);
+                    self.scene.add(self.light1);
+                    self.light2 = new THREE.AmbientLight(0xffffff, 1); // soft white light
+                    self.scene.add(self.light2);
+                    const hemiLight = new THREE.HemisphereLight(0xffffff);
+                    hemiLight.position.set(0, 20, 0);
+                    self.scene.add(hemiLight);
+                    const dirLight = new THREE.DirectionalLight(0xffffff);
+                    dirLight.position.set(3, 10, 10);
+                    self.scene.add(hemiLight);
+                    // CAMERA
+                    self.camera = new THREE.PerspectiveCamera(40, self.c_width / self.c_height, 1, 1000);
+                    self.camera.position.set(20, 0, 5);
+                    //  self.camera.position.set(0, 40, 10);
+                    self.camera.lookAt(new THREE.Vector3(1, 1, 1))
+                    self.scene.add(self.camera);
+                    //RENDERER
+                    self.renderer = new THREE.WebGLRenderer({ canvas: myCanvas, alpha: true, antialias: true, preserveDrawingBuffer: true });
+                    self.renderer.setSize(self.c_width, self.c_height);
+                    self.renderer.setPixelRatio(window.devicePixelRatio);
+                    self.renderer.outputEncoding = THREE.sRGBEncoding;
+                    self.renderer.shadowMap.enabled = true;
+                    self.renderer.render(self.scene, self.camera);
+                    // return self.$iniDef.promise();
+                },
+               
+                LOAD: function (fileName) {
+                    // get correct loader
+                    let ext = fileName.split('.').pop();
+                    switch (ext) {
+                        case 'glb':
+                        case 'gltf':
+                            this.loadGL(fileName);
+                            break;
+                        case 'obj':
+                            this.loadOBJ(fileName);
+                            break;
+                        default:
+                            alert('file not supported');
+                            break;
+                    }
+                },
+                loadGL: function (name) {
+                    var self = this;
+                    self.INI();
+                    Loader.on();
+                    let path = `${window.location}files/loadFile/${name}`;
+                    const loader = new GLTFLoader();
+                    loader.load(path, function (model) {
+                        self.model = model;
+                        self.scene.add(self.model.scene);
+                        Loader.off();
+                        self.addCtrl();
+                    },
+                        function (xhr) {
+                            console.log((xhr.loaded / xhr.total * 100) + " %");
+                        },
+                        function (err) {
+                            Loader.off();
+                            var rep = err.responseText || err.statusText;
+                            console.log(err);
+                            alert(rep);
+                        });
+                },
+                loadOBJ: function (name) {
+                    Loader.on();
+                    var self = this;
+                    self.INI();
+                    let path = `${window.location}files/loadFile/${name}`;
+                    const loader = new OBJLoader();
+                    loader.load(path, function (model) {
+                        self.model = model;
+                        self.scene.add(self.model);
+                        Loader.off();
+                        self.addCtrl();
+                    },
+                        function (xhr) {
+                            console.log((xhr.loaded / xhr.total * 100) + " %");
+                        },
+                        function (err) {
+                            console.log(err);
+                            Loader.off();
+                            var rep = err.responseText || err.statusText;
+                            alert(rep);
+                        });
+                },
+                addCtrl: function () {
+                    var self = this;
+                    self.controls = new OrbitControls(self.camera, self.renderer.domElement);
+                    self.controls.enablePan = true;
+                    self.controls.enableZoom = true;
+                    self.controls.autoRotate = true;
+                    self.controls.update();
+                    function animate() {
+                        self.renderer.render(self.scene, self.camera);
+                        requestAnimationFrame(animate);
+                        // self.camera.lookAt(self.cameraTarget);
+                    };
+                    animate();
+                },
+                //#region OPPS
+               
+                toggleViewMesh: function (m) { m.visible = !m.visible; },
+                isMeshSelected: function (actual) {
+                    return this.meshSelected != '' && this.meshSelected.id == actual.id
+                },
+                meshSelect: function (actual) {
+                    var self = this;
+                    if (self.meshSelected.id == actual.id)
+                        self.meshSelected = '';
+                    else
+                        self.meshSelected = actual;
+                },
+                //#endregion OPPS
+
+                //#region RAYCAST
+                generFloor: function () {
+                    let pos = { x: 0, y: -1, z: 3 };
+                    let scale = { x: 100, y: 2, z: 100 };
+                    var blockPlane = new THREE.Mesh(new THREE.BoxBufferGeometry(), new THREE.MeshPhongMaterial({ color: 0x185cef }));
+                    blockPlane.position.set(pos.x, pos.y, pos.z);
+                    blockPlane.scale.set(scale.x, scale.y, scale.z);
+                    blockPlane.castShadow = true;
+                    blockPlane.receiveShadow = true;
+                    // this.scene.add(blockPlane);
+                    blockPlane.userData.ground = true;
+                    return blockPlane;
+                },
+                generBox: function () {
+                    let scale = { x: 6, y: 6, z: 6 }
+                    let pos = { x: 15, y: scale.y / 2, z: 15 }
+                    var box = new THREE.Mesh(new THREE.BoxBufferGeometry(), new THREE.MeshPhongMaterial({ color: 0xDC143C }));
+                    box.position.set(pos.x, pos.y, pos.z);
+                    box.scale.set(scale.x, scale.y, scale.z);
+                    box.castShadow = true;
+                    box.receiveShadow = true;
+                    box.userData.draggable = true;
+                    box.userData.name = 'BOX';
+                    return box;
+                },
+                generSphere: function () {
+                    let radius = 4;
+                    let pos = { x: 15, y: radius, z: -15 };
+                    var sphere = new THREE.Mesh(new THREE.SphereBufferGeometry(radius, 32, 32), new THREE.MeshPhongMaterial({ color: 0x43a1f4 }));
+                    sphere.position.set(pos.x, pos.y, pos.z);
+                    sphere.castShadow = true;
+                    sphere.receiveShadow = true;
+                    sphere.userData.draggable = true;
+                    sphere.userData.name = 'SPHERE';
+                    return sphere;
+                },
+                generCylinder: function () {
+                    let radius = 4;
+                    let height = 6
+                    let pos = { x: -15, y: height / 2, z: 15 };
+                    var cylinder = new THREE.Mesh(new THREE.CylinderBufferGeometry(radius, radius, height, 32), new THREE.MeshPhongMaterial({ color: 0x90ee90 }));
+                    cylinder.position.set(pos.x, pos.y, pos.z);
+                    cylinder.castShadow = true;
+                    cylinder.receiveShadow = true;
+                    cylinder.userData.draggable = true;
+                    cylinder.userData.name = 'CYLINDER';
+                    return cylinder;
+                },
+                rayINI: function () {
+                    var self = this;
+                    var raycaster = new THREE.Raycaster();
+                    var clickMouse = new THREE.Vector2();
+                    var moveMouse = new THREE.Vector2();
+                    var draggable;
+                    function intersect(pos) {
+                        raycaster.setFromCamera(pos, camera);
+                        return raycaster.intersectObjects(scene.children);
+                    }
+                    var camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 1500);
+                    camera.position.set(-35, 70, 100);
+                    camera.lookAt(new THREE.Vector3(0, 0, 0));
+                    var scene = new THREE.Scene();
+                    scene.background = new THREE.Color(0xbfd1e5);
+                    // ambient light
+                    let hemiLight = new THREE.AmbientLight(0xffffff, 0.20);
+                    scene.add(hemiLight);
+                    //Add directional light
+                    let dirLight = new THREE.DirectionalLight(0xffffff, 1);
+                    dirLight.position.set(-30, 50, -30);
+                    scene.add(dirLight);
+                    dirLight.castShadow = true;
+                    dirLight.shadow.mapSize.width = 2048;
+                    dirLight.shadow.mapSize.height = 2048;
+                    dirLight.shadow.camera.left = -70;
+                    dirLight.shadow.camera.right = 70;
+                    dirLight.shadow.camera.top = 70;
+                    dirLight.shadow.camera.bottom = -70;
+                    // renderer
+                    var renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                    renderer.setPixelRatio(window.devicePixelRatio, 2);
+                    renderer.outputEncoding = THREE.sRGBEncoding;
+                    renderer.shadowMap.enabled = true;
+                    renderer.render(scene, camera);
+                    var infoDiv = document.createElement("div");
+                    infoDiv.style.margin = '10px';
+                    var info = '<h4 style="text-align:center;"> First click is for picking, then it can be move on the board. </h4>';
+                    info += '<h4 style="text-align:center;"> Another click will drop it.  </h4>';
+                    infoDiv.innerHTML = info;
+                    document.body.appendChild(infoDiv);
+                    document.body.appendChild(renderer.domElement);
+                    function dragObject() {
+                        if (draggable != null) {
+                            const found = intersect(moveMouse);
+                            if (found.length > 0) {
+                                for (let i = 0; i < found.length; i++) {
+                                    if (!found[i].object.userData.ground)
+                                        continue
+                                    let target = found[i].point;
+                                    draggable.position.x = target.x;
+                                    draggable.position.z = target.z;
+                                }
+                            }
+                        }
+                    }
+                    var floor = self.generFloor();
+                    var box = self.generBox();
+                    var sphere = self.generSphere();
+                    var cyl = self.generCylinder();
+                    scene.add(floor);
+                    scene.add(box);
+                    scene.add(sphere);
+                    scene.add(cyl);
+                    window.addEventListener('click', function (ev) {
+                        if (draggable != null) {
+                            console.log(`drop ${draggable.userData.name}`)
+                            draggable = null;
+                            return;
+                        }
+                        // THREE RAYCASTER
+                        clickMouse.x = (ev.clientX / window.innerWidth) * 2 - 1;
+                        clickMouse.y = -(ev.clientY / window.innerHeight) * 2 + 1;
+                        var found = intersect(clickMouse);
+                        if (found.length > 0) {
+                            if (found[0].object.userData.draggable) {
+                                draggable = found[0].object;
+                                console.log(`found ${draggable.userData.name}`);
+                            }
+                        }
+                    });
+                    window.addEventListener('mousemove', function (ev) {
+                        moveMouse.x = (ev.clientX / window.innerWidth) * 2 - 1;
+                        moveMouse.y = -(ev.clientY / window.innerHeight) * 2 + 1;
+                    });
+                    window.addEventListener('resize', function (ev) {
+                        camera.aspect = window.innerWidth / window.innerHeight;
+                        camera.updateProjectionMatrix();
+                        // update renderer
+                        renderer.setSize(window.innerWidth, window.innerHeight);
+                        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                    });
+                    function animate() {
+                        dragObject();
+                        renderer.render(scene, camera);
+                        requestAnimationFrame(animate);
+                    }
+                    animate();
+                },
+                //#endregion RAYCAST
+            },
+        });
+    </script>
+</body>
+</html>

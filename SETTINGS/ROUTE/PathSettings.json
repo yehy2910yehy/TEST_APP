@@ -1,0 +1,12 @@
+{
+  "PathSettings": {
+    "mainFolder": "$$$ SITE $$$",
+    "webFolder": "$$$ SITE $$$\\site",
+    "partialFolder": "$$$ SITE $$$\\partial",
+    "replyFolder": "$$$ SITE $$$\\reply",
+    "publicFolder": "PUBLICASSETS",
+    "ipFullFolder": "C:\\_IP_FILTER",
+    "userLogFolder": "C:\\_USER_LOG",
+    "errorLogFolder": "C:\\_ERROR_LOG"
+  }
+}

@@ -1,0 +1,93 @@
+﻿.titre {
+    margin: 0 2rem;
+    color: #424242;
+}
+
+.h1 {
+    font-size: 2rem !important;
+    display: inline-block !important;
+}
+.h2 {
+    font-size: 1.8rem !important;
+    display: inline-block !important;
+}
+.h3 {
+    font-size: 1.6rem !important;
+    display: inline-block !important;
+}
+
+.h4 {
+    font-size: 1.4rem !important;
+    display: inline-block !important;
+}
+
+.h5 {
+    font-size: 1.2rem !important;
+    display: inline-block !important;
+}
+
+.h6 {
+    font-size: 1rem !important;
+    display: inline-block !important;
+}
+
+
+.h7 {
+    font-size: 0.8rem !important;
+    display: inline-block !important;
+}
+
+.h8 {
+    font-size: 0.6rem !important;
+    display: inline-block !important;
+}
+
+
+
+.h1Block {
+    font-size: 2rem !important;
+    display: block !important;
+}
+
+.h2Block {
+    font-size: 1.8rem !important;
+    display: block !important;
+}
+
+.h3Block {
+    font-size: 1.6rem !important;
+    display: block !important;
+}
+
+.h4Block {
+    font-size: 1.4rem !important;
+    display: block !important;
+}
+
+.h5Block {
+    font-size: 1.2rem !important;
+    display: block !important;
+}
+
+.h6Block {
+    font-size: 1rem !important;
+    display: block !important;
+}
+
+
+.h7Block {
+    font-size: 0.8rem !important;
+    display: block !important;
+}
+
+.h8Block {
+    font-size: 0.6rem !important;
+    display: block !important;
+}
+
+.spliter {
+    padding: 0 !important;
+    margin: 0 !important;
+    height: 2px !important;
+    margin-top: 1rem !important;
+}
